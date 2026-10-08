@@ -50,3 +50,5 @@ int search_database(mainnode_t *hash_table[], char *word);
 int save_database(mainnode_t *hash_table[], char *filename);
 
 int update_database(mainnode_t *hash_table[], char *filename);
+
+int search_database(mainnode_t *hash_table[], char *word);

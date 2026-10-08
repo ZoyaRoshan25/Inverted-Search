@@ -58,6 +58,9 @@ int main(int argc, char *argv[])
 
     // Display menu
     int choice;
+    char word[WORD_SIZE];
+    char filename[FNAME_SIZE];
+    
     while(1)
     {
         printf("\n1. Create Database\n");
@@ -96,6 +99,10 @@ int main(int argc, char *argv[])
                 }
                 break;
             case 3:
+                printf("\nEnter the word to search: ");
+                scanf("%19s", word);
+
+                search_database(hash_table, word);
                 break;
             case 4:
                 break;

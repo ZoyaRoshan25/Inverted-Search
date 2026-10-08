@@ -302,3 +302,63 @@ int display_database(mainnode_t *hash_table[])
 
     return SUCCESS;
 }
+
+int search_database(mainnode_t *hash_table[], char *word)
+{
+    int index;
+    mainnode_t *main_temp;
+    subnode_t *sub_temp;
+
+    // Find hash index
+    if(word[0] >= 'A' && word[0] <= 'Z')
+    {
+        index = word[0] - 'A';
+    }
+    else if(word[0] >= 'a' && word[0] <= 'z')
+    {
+        index = word[0] - 'a';
+    }
+    else if(word[0] >= '0' && word[0] <= '9')
+    {
+        index = 26;
+    }
+    else
+    {
+        index = 27;
+    }
+
+    // Search word in main node
+    main_temp = hash_table[index];
+
+    while(main_temp != NULL)
+    {
+        if(strcmp(main_temp->word, word) == 0)
+        {
+            break;
+        }
+
+        main_temp = main_temp->link;
+    }
+
+    // Word not found
+    if(main_temp == NULL)
+    {
+        printf("Word not found in database\n");
+        return DATA_NOT_FOUND;
+    }
+
+    // Display word information
+    printf("\nWord: %s\n", main_temp->word);
+    printf("File count: %d\n", main_temp->file_count);
+
+    // Traverse subnodes
+    sub_temp = main_temp->sub_link;
+
+    while(sub_temp != NULL)
+    {
+        printf("%s : %d\n", sub_temp->f_name, sub_temp->word_count);
+        sub_temp = sub_temp->link;
+    }
+
+    return SUCCESS;
+}
