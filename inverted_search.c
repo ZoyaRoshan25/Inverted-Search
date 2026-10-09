@@ -3,13 +3,25 @@
 #include <string.h>
 #include <stdlib.h>
 
+int get_index(char *word)
+{
+    if (word[0] >= 'A' && word[0] <= 'Z')
+        return word[0] - 'A';
+
+    if (word[0] >= 'a' && word[0] <= 'z')
+        return word[0] - 'a';
+
+    if (word[0] >= '0' && word[0] <= '9')
+        return 26;
+
+    return 27;
+}
+
 // Insert file at first position
 int insert_at_first(filenames_t **head, char *filename)
 {
-    filenames_t *new;
-
     // Allocate memory for new node
-    new = malloc(sizeof(filenames_t));
+    filenames_t *new = malloc(sizeof(filenames_t));
 
     if(new == NULL)
     {
@@ -275,10 +287,7 @@ int display_database(mainnode_t *hash_table[])
         // Traverse main nodes
         while(main_temp != NULL)
         {
-            printf("[%d] %s : %d file(s)",
-                   i,
-                   main_temp->word,
-                   main_temp->file_count);
+            printf("[%d] [%s] : %d file(s)",i,main_temp->word,main_temp->file_count);
 
             // Get first subnode
             sub_temp = main_temp->sub_link;
@@ -286,10 +295,7 @@ int display_database(mainnode_t *hash_table[])
             // Traverse subnodes
             while(sub_temp != NULL)
             {
-                printf(" -> %s : %d",
-                       sub_temp->f_name,
-                       sub_temp->word_count);
-
+                printf(" -> %s : %d",sub_temp->f_name,sub_temp->word_count);
                 sub_temp = sub_temp->link;
             }
 
@@ -309,23 +315,7 @@ int search_database(mainnode_t *hash_table[], char *word)
     mainnode_t *main_temp;
     subnode_t *sub_temp;
 
-    // Find hash index
-    if(word[0] >= 'A' && word[0] <= 'Z')
-    {
-        index = word[0] - 'A';
-    }
-    else if(word[0] >= 'a' && word[0] <= 'z')
-    {
-        index = word[0] - 'a';
-    }
-    else if(word[0] >= '0' && word[0] <= '9')
-    {
-        index = 26;
-    }
-    else
-    {
-        index = 27;
-    }
+    index = get_index(word);
 
     // Search word in main node
     main_temp = hash_table[index];
@@ -359,6 +349,185 @@ int search_database(mainnode_t *hash_table[], char *word)
         printf("%s : %d\n", sub_temp->f_name, sub_temp->word_count);
         sub_temp = sub_temp->link;
     }
+
+    return SUCCESS;
+}
+
+int save_database(mainnode_t *hash_table[], char *filename)
+{
+    FILE *fptr;
+    mainnode_t *main_temp;
+    subnode_t *sub_temp;
+    int i;
+
+    // Open file for writing
+    fptr = fopen(filename, "w");
+
+    if(fptr == NULL)
+    {
+        printf("File not opened\n");
+        return FAILURE;
+    }
+
+    // Traverse all hash table indexes
+    for(i = 0; i < 28; i++)
+    {
+        main_temp = hash_table[i];
+
+        // Traverse main nodes
+        while(main_temp != NULL)
+        {
+            fprintf(fptr, "#%d;%s;%d;",i,main_temp->word,main_temp->file_count);
+
+            // Traverse subnodes
+            sub_temp = main_temp->sub_link;
+
+            while(sub_temp != NULL)
+            {
+                fprintf(fptr, "%s;%d;",sub_temp->f_name,sub_temp->word_count);
+                sub_temp = sub_temp->link;
+            }
+
+            fprintf(fptr, "#\n");
+
+            main_temp = main_temp->link;
+        }
+    }
+
+    // Close file
+    fclose(fptr);
+
+    printf("Database saved successfully\n");
+
+    return SUCCESS;
+}
+
+int update_database(filenames_t **head,mainnode_t *hash_table[],char *filename)
+{
+    FILE *fptr;
+    char buff[WORD_SIZE];
+    int index;
+
+    mainnode_t *main_temp;
+    mainnode_t *new_main;
+    subnode_t *sub_temp;
+    subnode_t *new_sub;
+
+    // Check file extension
+    if (check_file_extension(filename) == FAILURE)
+    {
+        printf("Invalid file extension\n");
+        return FAILURE;
+    }
+
+    // Check duplicate file
+    if (check_duplicate(*head, filename) == SUCCESS)
+    {
+        printf("File already exists\n");
+        return FAILURE;
+    }
+
+    // Open new file
+    fptr = fopen(filename, "r");
+
+    if (fptr == NULL)
+    {
+        printf("File not found or cannot be opened\n");
+        return FAILURE;
+    }
+
+    // Read words from the new file
+    while (fscanf(fptr, "%19s", buff) == 1)
+    {
+        index = get_index(buff);
+        main_temp = hash_table[index];
+
+        // Search for the word
+        while (main_temp != NULL)
+        {
+            if (strcmp(main_temp->word, buff) == 0)
+                break;
+
+            main_temp = main_temp->link;
+        }
+
+        if (main_temp != NULL)
+        {
+            sub_temp = main_temp->sub_link;
+
+            // Search for the file in subnodes
+            while (sub_temp != NULL)
+            {
+                if (strcmp(sub_temp->f_name, filename) == 0)
+                    break;
+
+                sub_temp = sub_temp->link;
+            }
+
+            if (sub_temp != NULL)
+            {
+                sub_temp->word_count++;
+            }
+            else
+            {
+                // Add a new subnode
+                new_sub = malloc(sizeof(subnode_t));
+
+                if (new_sub == NULL)
+                {
+                    fclose(fptr);
+                    return FAILURE;
+                }
+
+                strcpy(new_sub->f_name, filename);
+                new_sub->word_count = 1;
+
+                new_sub->link = main_temp->sub_link;
+                main_temp->sub_link = new_sub;
+
+                main_temp->file_count++;
+            }
+        }
+        else
+        {
+            // Create a new main node
+            new_main = malloc(sizeof(mainnode_t));
+
+            if (new_main == NULL)
+            {
+                fclose(fptr);
+                return FAILURE;
+            }
+
+            strcpy(new_main->word, buff);
+            new_main->file_count = 1;
+            new_main->link = hash_table[index];
+            new_main->sub_link = NULL;
+
+            // Create first subnode
+            new_sub = malloc(sizeof(subnode_t));
+
+            if (new_sub == NULL)
+            {
+                free(new_main);
+                fclose(fptr);
+                return FAILURE;
+            }
+
+            strcpy(new_sub->f_name, filename);
+            new_sub->word_count = 1;
+            new_sub->link = NULL;
+
+            new_main->sub_link = new_sub;
+            hash_table[index] = new_main;
+        }
+    }
+
+    fclose(fptr);
+
+    // Add filename to the file list
+    if (insert_at_last(head, filename) == FAILURE)
+        return FAILURE;
 
     return SUCCESS;
 }

@@ -29,8 +29,6 @@ typedef struct mainnode
     struct sub *sub_link;
 } mainnode_t;
 
-#endif
-
 int check_duplicate(filenames_t *head, char *filename);
 
 int insert_at_first(filenames_t **head, char *filename);
@@ -49,6 +47,8 @@ int search_database(mainnode_t *hash_table[], char *word);
 
 int save_database(mainnode_t *hash_table[], char *filename);
 
-int update_database(mainnode_t *hash_table[], char *filename);
+int update_database(filenames_t **head,mainnode_t *hash_table[],char *filename);
 
-int search_database(mainnode_t *hash_table[], char *word);
+int get_index(char *word);
+
+#endif

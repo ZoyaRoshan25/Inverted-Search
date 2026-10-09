@@ -1,3 +1,11 @@
+/*NAME : ZOYA ROSHAN DESAI
+DATE : 09/10/2026
+BATCH ID: INT26003_004
+PROJECT NAME : INVERTED SEARCH
+DESCRIPTION : Implemented an inverted search system using a hash table to index words from multiple text files.
+              Supports searching, displaying, updating, and saving the word database with file occurrence counts.*/
+
+
 #include "inverted_search.h"
 #include <stdio.h>
 
@@ -60,7 +68,8 @@ int main(int argc, char *argv[])
     int choice;
     char word[WORD_SIZE];
     char filename[FNAME_SIZE];
-    
+    int db_created = 0;
+
     while(1)
     {
         printf("\n1. Create Database\n");
@@ -77,6 +86,12 @@ int main(int argc, char *argv[])
         {
             case 1:
                 // Create database from input files
+                if(db_created == 1)
+                {
+                    printf("\nDatabase already created\n");
+                    break;
+                }
+
                 printf("\nCreating Database...\n");
 
                 if(create_database(head, hash_table) == SUCCESS)
@@ -105,8 +120,17 @@ int main(int argc, char *argv[])
                 search_database(hash_table, word);
                 break;
             case 4:
+                printf("\nEnter database file name: ");
+                scanf("%29s", filename);
+
+                save_database(hash_table, filename);
                 break;
             case 5:
+                printf("\nEnter new file name: ");
+                scanf("%29s", filename);
+
+                update_database(&head, hash_table, filename);
+
                 break;
             case 6:
                 return 0;

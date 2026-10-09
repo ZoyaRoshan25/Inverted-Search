@@ -1,0 +1,12 @@
+#2;c;1;f2.txt;1;#
+#4;embedded;2;f2.txt;1;f1.txt;1;#
+#7;hello;3;f4.txt;1;f2.txt;1;f1.txt;2;#
+#11;linux;1;f2.txt;1;#
+#12;microcontroller;1;f4.txt;1;#
+#15;programming;1;f2.txt;1;#
+#18;systems;3;f4.txt;1;f2.txt;1;f1.txt;1;#
+#22;world;1;f1.txt;1;#
+#25;zoya;2;f4.txt;1;f1.txt;1;#
+#26;456;1;f4.txt;1;#
+#26;123;1;f4.txt;1;#
+#27;@home;1;f4.txt;1;#
