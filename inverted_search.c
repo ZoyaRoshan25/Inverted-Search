@@ -360,6 +360,20 @@ int save_database(mainnode_t *hash_table[], char *filename)
     subnode_t *sub_temp;
     int i;
 
+    // Check filename 
+    if (filename == NULL || filename[0] == '\0') 
+    {
+         printf("Invalid filename\n"); 
+         return FAILURE; 
+    } 
+    
+    // Check file extension 
+    if (check_file_extension(filename) == FAILURE) 
+    { 
+        printf("File should have .txt extension\n"); 
+        return FAILURE; 
+    }
+    
     // Open file for writing
     fptr = fopen(filename, "w");
 
